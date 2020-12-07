@@ -257,8 +257,77 @@ void parse(){
 	}
 }
 
+//return true if delimiter
+bool isDelimiter(string ch){
+	if (ch == " " || ch == "+" || ch == "-" || ch == "*" ||
+			ch == "/" || ch == "," || ch == ";" || ch == ">" ||
+			ch == "<" || ch == "=" || ch == "(" || ch == ")" ||
+			ch == "[" || ch == "]" || ch == "{" || ch == "}")
+
+			return (true);
+		return (false);
+}
+
+//returns 'true' if the character is an OPERATOR.
+bool isOperator(string ch)
+{
+	if (ch == "+" || ch == "-" || ch == "*" ||
+		ch == "/" || ch == ">" || ch == "<" ||
+		ch == "=")
+		return (true);
+	return (false);
+}
+//return true if keyword
+bool isKeyword(string str)
+{
+	if (!str.compare("if") || !str.compare( "else") ||
+		!str.compare("while") || !str.compare("do") ||
+		!str.compare("break") ||
+		!str.compare("continue") || !str.compare("int")
+		|| !str.compare("double") || !str.compare("float")
+		|| !str.compare("return") || !str.compare("char")
+		|| !str.compare("case") || !str.compare("char")
+		|| !str.compare("sizeof") || !str.compare("long")
+		|| !str.compare("short") || !str.compare("typedef")
+		|| !str.compare("switch") || !str.compare("unsigned")
+		|| !str.compare("void") || !str.compare("static")
+		|| !str.compare("struct") || !str.compare("goto"))
+		return (true);
+	return (false);
+}
+//parse input string
+void parse_token(string input){
+
+	int strlen = input.length();
+
+	int idx = 0;
+	int pos = 0; //starting position to get next token
+	while(idx <= strlen){
+		string str = input.substr(idx,1); 	//string example = "int a = b + 1c; float d = 0.32; ";
+
+		if(isDelimiter(str) == false){
+			idx++;
+		}
+		if(isDelimiter(str) == true && pos == idx){
+			if(isOperator(str) == true){
+				cout << str << endl;
+			}
+			idx++;
+			pos = idx;
+		}else if (isDelimiter(str) == true && pos != idx || (idx == strlen && pos != idx)) {
+			string token = input.substr(pos, idx-pos);
+			cout << "token : " + token << endl;
+			pos = idx;
+		}
+	}
+}
+
+
 int main() {
-	parse();
+	//parse();
+	string example = "int a = b + 1c; float d = 0.32; ";
+
+	parse_token(example);
 	system("Pause");
 	return 0;
 }
