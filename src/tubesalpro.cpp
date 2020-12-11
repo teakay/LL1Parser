@@ -28,6 +28,10 @@ void cond_op();
 void var();
 void var_name();
 void value();
+void val_assign();
+void boolean();
+void array_init();
+void object_init();
 void class_stmt();
 void accept(string str);
 string ltrim(string str);
@@ -39,7 +43,7 @@ int main() {
 }
 
 void scan(){
-	readFile.open("test2.txt");
+	readFile.open("test.txt");
 
 	if (readFile.is_open())
 	{
@@ -153,7 +157,7 @@ void code(){
 	}
 }
 
-//assignment_stmt ::= <var> = <value>
+//assignment_stmt ::= <var> = <val-assign>
 void assignment_stmt(){
     cout << "<assignment> found \t\t" + strline << endl;
 	if(currentToken.substr(0,1) == "$"){
@@ -169,20 +173,8 @@ void assignment_stmt(){
 		var();
 	}
 	else{
-		value();
+		val_assign();
 	}
-}
-
-//class_stmt ::= class var_name{}
-void class_stmt(){
-    cout << "<class> found \t\t" << currentToken << endl;
-	currentToken = getToken();
-	if(currentToken == " "){
-		currentToken = getToken();
-	}
-	var_name();
-    accept("{");
-    accept("}");
 }
 
 //<if_else_stmt> ::= if(<conditions>){<block_inline_statement>} [elseif(<conditions>){<block_inline_statement>}] [else{<block_inline_statement>}]
@@ -239,6 +231,64 @@ void var(){
 //value
 void value(){
 	cout << "<value> found \t\t\t" + currentToken << endl;
+}
+
+//<val_assign> ::= <boolean> | <array-init> | <object-init>
+void val_assign(){
+    cout << "<val_assign> found \t\t\t" + currentToken << endl;
+    if (currentToken=="true" || currentToken=="false"){
+        boolean();
+	}
+	else if(currentToken=="array"){
+        array_init();
+	}
+	else if(currentToken=="new"){
+        object_init();
+	}
+}
+
+//boolean ::= true | false
+void boolean(){
+    cout << "<boolean> found \t\t\t" + currentToken << endl;
+}
+
+//array_init::= array(<value>)
+void array_init(){
+    cout << "<array_init> found \t\t\t" + currentToken << endl;
+    accept("(");
+    accept(")");
+}
+
+//object_init::= new <var_name>()
+void object_init(){
+    cout << "<object_init> found \t\t\t" + strline << endl;
+    currentToken = getToken();
+	if(currentToken == " "){
+		currentToken = getToken();
+	}
+    var_name();
+    accept("(");
+    accept(")");
+}
+
+//class_stmt ::= class var_name{} | abstract class var_name{}
+void class_stmt(){
+    cout << "<class> found \t\t" << currentToken << endl;
+    currentToken = getToken();
+	if(currentToken == " "){
+		currentToken = getToken();
+		//run when abstract
+		if(currentToken=="class"){
+            cout << "<class> found \t\t" << currentToken << endl;
+            currentToken = getToken();
+            if(currentToken == " "){
+                currentToken = getToken();
+            }
+		}
+	}
+	var_name();
+    accept("{");
+    accept("}");
 }
 
 //var name
