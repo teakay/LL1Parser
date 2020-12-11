@@ -21,11 +21,14 @@ bool isDelimiter(string str);
 void program();
 void code();
 void if_else_stmt();
+void assignment_stmt();
 void condition();
 void cond_var();
 void cond_op();
 void var();
+void var_name();
 void value();
+void class_stmt();
 void accept(string str);
 string ltrim(string str);
 
@@ -36,7 +39,7 @@ int main() {
 }
 
 void scan(){
-	readFile.open("test.txt");
+	readFile.open("test2.txt");
 
 	if (readFile.is_open())
 	{
@@ -133,7 +136,7 @@ void program(){
 	}
 }
 
-//<code> ::= <if_else_stmt> | <loop_stmt> | <class_stmt> | <print_stmt>
+//<code> ::= <if_else_stmt> | <loop_stmt> | <class_stmt> | <print_stmt> | <assignment_stmt>
 void code(){
 	cout << "<code> found \t\t\t" + strline << endl;
 
@@ -142,10 +145,44 @@ void code(){
 	}else if(currentToken == "for" || currentToken == "foreach"|| currentToken == "while" || currentToken == "do"){
 		cout << "<loop_stmt> found" << endl;
 	}else if(currentToken == "abstract" || currentToken == "class"){
-		cout << "<class_stmt> found" << endl;
+		class_stmt();
 	}else if(currentToken == "echo" || currentToken == "print"){
 		cout << "<print_stmt> found" << endl;
+	}else if(currentToken.substr(0,1) == "$"){
+	    assignment_stmt();accept(";");
 	}
+}
+
+//assignment_stmt ::= <var> = <value>
+void assignment_stmt(){
+    cout << "<assignment> found \t\t" + strline << endl;
+	if(currentToken.substr(0,1) == "$"){
+        var();
+		currentToken = getToken();
+	}
+	accept("=");
+	currentToken = getToken();
+	if(currentToken == " "){
+		currentToken = getToken();
+	}
+    if(currentToken.substr(0,1) == "$"){
+		var();
+	}
+	else{
+		value();
+	}
+}
+
+//class_stmt ::= class var_name{}
+void class_stmt(){
+    cout << "<class> found \t\t" << currentToken << endl;
+	currentToken = getToken();
+	if(currentToken == " "){
+		currentToken = getToken();
+	}
+	var_name();
+    accept("{");
+    accept("}");
 }
 
 //<if_else_stmt> ::= if(<conditions>){<block_inline_statement>} [elseif(<conditions>){<block_inline_statement>}] [else{<block_inline_statement>}]
@@ -202,12 +239,16 @@ void var(){
 //value
 void value(){
 	cout << "<value> found \t\t\t" + currentToken << endl;
+}
 
+//var name
+void var_name(){
+	cout << "<var_name> found \t\t\t" + currentToken << endl;
 }
 
 void accept(string str){
 	currentToken = getToken();
-//	cout << "accept token \t\t\t" + currentToken << endl;
+	cout << "accept token \t\t\t" + currentToken << endl;
 	if(str != currentToken){
 		cout << "error";
 		return;
