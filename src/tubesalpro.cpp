@@ -29,10 +29,24 @@ void var();
 void var_name();
 void value();
 void val_assign();
+void num();
+
+void expr();
+void expr_();
+void term();
+void term_();
+void factor();
+
 void boolean();
 void array_init();
+void value_list();
+void val_list();
 void object_init();
 void class_stmt();
+void abstract();
+void ex_impl();
+void interface_name_list();
+void interface_list();
 void accept(string str);
 string ltrim(string str);
 
@@ -94,6 +108,37 @@ string getToken(){
 	}
 	return token;
 }
+
+// see nextToken (untuk melihat token selanjutnya tanpa menambahkan endpos dan startpos yang asli
+string nextToken(){
+	int strlen = strline.length();
+	string token;
+	int endp = endpos;
+	int startp = startpos;
+	while(endp <= strlen){
+		string str = strline.substr(endp,1); //get first character from string input
+
+		if(isDelimiter(str) == false){
+			endp++;
+		}
+		if(isDelimiter(str) == true && endp == startp){
+			token = strline.substr(startp, 1);
+//			cout << "token1 : " << token << endl;
+			endp++;
+			startp = endp;
+			return token;
+
+		}else if (isDelimiter(str) == true && endp != startp || (endp == strlen && startp != endp)) {
+			token = strline.substr(startp, endp-startp);
+//			cout << "token2 :" << token << endl;
+			startp = endp;
+			return token;
+
+		}
+	}
+	return token;
+}
+
 //return true if delimiter
 bool isDelimiter(string ch){
 //	if(ch == "<"  ){
@@ -228,16 +273,108 @@ void var(){
 	cout << "<var> found \t\t\t" + currentToken << endl;
 }
 
-//value
+//value ::= <boolean> | <expr>
 void value(){
 	cout << "<value> found \t\t\t" + currentToken << endl;
-}
-
-//<val_assign> ::= <boolean> | <array-init> | <object-init>
-void val_assign(){
-    cout << "<val_assign> found \t\t\t" + currentToken << endl;
     if (currentToken=="true" || currentToken=="false"){
         boolean();
+	}
+	else if(currentToken.substr(0,1) == "-" ||
+        currentToken.substr(0,1) == "0" ||
+        currentToken.substr(0,1) == "1" ||
+        currentToken.substr(0,1) == "2" ||
+        currentToken.substr(0,1) == "3" ||
+        currentToken.substr(0,1) == "4" ||
+        currentToken.substr(0,1) == "5" ||
+        currentToken.substr(0,1) == "6" ||
+        currentToken.substr(0,1) == "7" ||
+        currentToken.substr(0,1) == "8" ||
+        currentToken.substr(0,1) == "9" ||
+        currentToken == "(" ){
+        expr();
+    }
+}
+
+//<expr> ::= <term><expr_>
+void expr(){
+    term();
+    expr_();
+}
+
+//<expr_> ::= +<term><expr_> | -<term><expr_> | epsilon
+void expr_(){
+    if(nextToken()=="+"){
+        accept("+");
+        currentToken=getToken();
+        term();
+        expr_();
+    }
+    else if(nextToken()=="-"){
+        accept("-");
+        currentToken=getToken();
+        term();
+        expr_();
+    }
+}
+
+//<term> ::= <factor><term_>
+void term(){
+    factor();
+    term_();
+}
+
+//<term_> ::= *<term><expr_> | /<term><expr_> | %<term><expr_>
+void term_(){
+    if(nextToken()=="*"){
+        accept("*");
+        currentToken=getToken();
+        factor();
+        term_();
+    }
+    else if(nextToken()=="/"){
+        accept("/");
+        currentToken=getToken();
+        factor();
+        expr_();
+    }
+    else if(nextToken()=="%"){
+        accept("%");
+        currentToken=getToken();
+        factor();
+        expr_();
+    }
+}
+
+//<factor> ::= (<expr>) | <value_arithmetics>
+void factor(){
+    if(currentToken=="("){
+        cout << "accept token \t\t\t" + currentToken << endl;
+        currentToken=getToken();
+        expr();
+        accept(")");
+    } else{
+        num();
+    }
+}
+
+//<val_assign> ::= <array-init> | <object-init>
+void val_assign(){
+    cout << "<val_assign> found \t\t\t" + currentToken << endl;
+    if (currentToken=="true" ||
+        currentToken=="false" ||
+        currentToken.substr(0,1) == "-" ||
+        currentToken.substr(0,1) == "0" ||
+        currentToken.substr(0,1) == "1" ||
+        currentToken.substr(0,1) == "2" ||
+        currentToken.substr(0,1) == "3" ||
+        currentToken.substr(0,1) == "4" ||
+        currentToken.substr(0,1) == "5" ||
+        currentToken.substr(0,1) == "6" ||
+        currentToken.substr(0,1) == "7" ||
+        currentToken.substr(0,1) == "8" ||
+        currentToken.substr(0,1) == "9" ||
+        currentToken=="("){
+        value();
 	}
 	else if(currentToken=="array"){
         array_init();
@@ -245,6 +382,11 @@ void val_assign(){
 	else if(currentToken=="new"){
         object_init();
 	}
+}
+
+//num
+void num(){
+    cout << "<num> found \t\t\t" + currentToken << endl;
 }
 
 //boolean ::= true | false
@@ -256,10 +398,28 @@ void boolean(){
 void array_init(){
     cout << "<array_init> found \t\t\t" + currentToken << endl;
     accept("(");
+    currentToken=getToken();
+    value_list();
     accept(")");
 }
 
-//object_init::= new <var_name>()
+//value_list::= <value><val_list>
+void value_list(){
+    value();
+    val_list();
+}
+
+//val_list::= ,<value><val_list> | epsilon
+void val_list(){
+    if(nextToken()==","){
+        accept(",");
+        currentToken=getToken();
+        value();
+        val_list();
+    }
+}
+
+//object_init::= new <var_name>(<value_list>)
 void object_init(){
     cout << "<object_init> found \t\t\t" + strline << endl;
     currentToken = getToken();
@@ -268,12 +428,20 @@ void object_init(){
 	}
     var_name();
     accept("(");
+    value_list();
     accept(")");
 }
 
-//class_stmt ::= class var_name{} | abstract class var_name{}
+//class_stmt ::= <abstract> class <var_name> <ex-imp>{}
 void class_stmt(){
-    cout << "<class> found \t\t" << currentToken << endl;
+    if (currentToken=="abstract")
+    {
+        abstract();
+    }
+    else
+    {
+        cout << "<class> found \t\t" << currentToken << endl;
+    }
     currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
@@ -287,8 +455,62 @@ void class_stmt(){
 		}
 	}
 	var_name();
+	if (nextToken()==" "){
+        currentToken = getToken();
+        currentToken = getToken();
+		//run when extend
+		if(currentToken=="extends" || currentToken=="implements"){
+            cout << "<ex_impl> found \t\t" << currentToken << endl;
+            ex_impl();
+		}
+	}
     accept("{");
     accept("}");
+}
+
+//abstract ::= abstract | epsilon
+void abstract(){
+    if (currentToken=="abstract"){
+        cout << "<abstract> found \t\t" << currentToken << endl;
+    }
+    else if(currentToken=="class"){}
+}
+
+//ex_impl ::= extends <var_name> | implements <interface_name_list> | epsilon
+void ex_impl(){
+    if(currentToken=="extends"){
+        cout << "<ex_impl> found \t\t" << currentToken << endl;
+        currentToken = getToken();
+        if(currentToken == " "){
+            currentToken = getToken();
+        }
+        var_name();
+    }
+    else if(currentToken=="implements"){
+        cout << "<ex_impl> found \t\t" << currentToken << endl;
+        currentToken = getToken();
+        if(currentToken == " "){
+            currentToken = getToken();
+        }
+        interface_name_list();
+    }
+    else if(currentToken=="{"){}
+}
+
+//interface_name_list ::= <var_name><interface_list>
+void interface_name_list(){
+    var_name();
+    interface_list();
+}
+
+//interface_list ::= ,<var_name><interface_list> | epsilon
+void interface_list(){
+    if(nextToken()==","){
+        accept(",");
+        currentToken=getToken();
+        var_name();
+        interface_list();
+    }
 }
 
 //var name
