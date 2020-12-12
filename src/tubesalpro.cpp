@@ -51,12 +51,13 @@ void interface();
 void class_stmt();
 void function_stmt();
 void access();
-void stmt_func_list();
 void abstract();
 void ex_impl();
 void interface_name_list();
 void interface_list();
 void interface_const();
+void return_stmt();
+void var_this();
 void accept(string str);
 string ltrim(string str);
 
@@ -68,7 +69,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("../test4.txt");
+	readFile.open("../test3.txt");
 
 	if (readFile.is_open())
 	{
@@ -206,8 +207,17 @@ void code(){
 		cout << "<loop_stmt> found" << endl;
 	}else if(currentToken == "abstract" || currentToken == "class"){
 		class_stmt();
-	}else if(currentToken == "function" || currentToken == "private" || currentToken == "public" || currentToken == "protected"){
-		function_stmt();
+	}else if(currentToken == "private" || currentToken == "public" || currentToken == "protected"){
+		access();
+		currentToken = getToken();
+		if (currentToken == " ") {
+			currentToken = getToken();
+			if (currentToken == "function") {
+				function_stmt();
+			} else if (currentToken != "function") {
+				assignment_stmt();accept(";");
+			}
+		}
 	}else if(currentToken == "echo" || currentToken == "print"){
 		cout << "<print_stmt> found" << endl;
 	}else if(currentToken.substr(0,1) == "$"){
@@ -218,6 +228,8 @@ void code(){
 		interface();
 	} else if(currentToken == "const"){
 		interface_const();
+	} else if(currentToken == "return"){
+		return_stmt();
 	}
 }
 
@@ -554,13 +566,13 @@ void ex_impl(){
 
 //function ::= <access> function <var_name> (<var_list>) {<stmt-func-list>}
 void function_stmt(){
-	if (currentToken!="function")
-    {
-        access();
-    }
-    else {
-        // cout << "<function> found \t\t" << currentToken << endl;
-    }
+	// if (currentToken!="function")
+ //    {
+ //        access();
+ //    }
+ //    else {
+ //        // cout << "<function> found \t\t" << currentToken << endl;
+ //    }
     currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
@@ -582,7 +594,6 @@ void function_stmt(){
 	accept(")");
 	if (nextToken()!=";") {
 		accept("{");
-    // stmt_func_list();
     // accept("}");
 	} else {
 		accept(";");
@@ -613,20 +624,6 @@ void var_list(){
 		}
 		
 	}
-}
-
-void stmt_func_list(){
-	// currentToken = getToken();
-	// cout << currentToken << endl;
-	// cout << nextToken() << endl;
-	// if (currentToken!=";" and nextToken()!= "}") {
-	// 	currentToken = getToken();
-	// 	stmt_func_list();
-	// } else if(currentToken==";" and nextToken()!= "}") {
-	// 	accept(";");
-	// }else if (nextToken()=="}") {
-
-	// }
 }
 
 //interface_name_list ::= <var_name><interface_list>
@@ -672,6 +669,31 @@ void interface_const(){
 //var name
 void var_name(){
 	cout << "<var_name> found \t\t\t" + currentToken << endl;
+}
+
+void return_stmt(){
+	cout << "<return> found \t\t\t" + currentToken << endl;
+	currentToken = getToken();
+	if (currentToken == " ") {
+		currentToken = getToken();
+
+		if (currentToken == "$this") {
+			var_this();
+		} else {
+			var();
+			accept(";");
+		}
+	}
+}
+
+void var_this(){
+	currentToken = getToken();
+	cout << "accept token \t\t\t" << "$this->" << endl;
+	currentToken = getToken();
+	currentToken = getToken();
+	currentToken = getToken();
+	var();
+	accept(";");
 }
 
 void accept(string str){
