@@ -57,7 +57,7 @@ int main() {
 }
 
 void scan(){
-	readFile.open("test.txt");
+	readFile.open("test2.txt");
 
 	if (readFile.is_open())
 	{
@@ -214,12 +214,13 @@ void assignment_stmt(){
 	if(currentToken == " "){
 		currentToken = getToken();
 	}
-    if(currentToken.substr(0,1) == "$"){
+	val_assign();
+/*    if(currentToken.substr(0,1) == "$"){
 		var();
 	}
 	else{
 		val_assign();
-	}
+	}*/
 }
 
 //<if_else_stmt> ::= if(<conditions>){<block_inline_statement>} [elseif(<conditions>){<block_inline_statement>}] [else{<block_inline_statement>}]
@@ -290,6 +291,7 @@ void value(){
         currentToken.substr(0,1) == "7" ||
         currentToken.substr(0,1) == "8" ||
         currentToken.substr(0,1) == "9" ||
+        currentToken.substr(0,1) == "$" ||
         currentToken == "(" ){
         expr();
     }
@@ -352,7 +354,9 @@ void factor(){
         currentToken=getToken();
         expr();
         accept(")");
-    } else{
+    } else if(currentToken.substr(0,1)=="$"){
+        var();
+    } else {
         num();
     }
 }
@@ -373,6 +377,7 @@ void val_assign(){
         currentToken.substr(0,1) == "7" ||
         currentToken.substr(0,1) == "8" ||
         currentToken.substr(0,1) == "9" ||
+        currentToken.substr(0,1) == "$" ||
         currentToken=="("){
         value();
 	}
