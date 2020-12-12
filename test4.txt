@@ -1,0 +1,7 @@
+<?php
+interface intname{
+const phi=3.14;
+public function func1();
+public function func2();
+}
+?>
