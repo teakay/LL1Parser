@@ -27,6 +27,7 @@ void cond_var();
 void cond_op();
 void var();
 void var_name();
+void var_list();
 void value();
 void val_assign();
 void num();
@@ -46,22 +47,28 @@ void array_init();
 void value_list();
 void val_list();
 void object_init();
+void interface();
 void class_stmt();
+void function_stmt();
+void access();
+void stmt_func_list();
 void abstract();
 void ex_impl();
 void interface_name_list();
 void interface_list();
+void interface_const();
 void accept(string str);
 string ltrim(string str);
 
 int main() {
 	scan();
-	system("Pause");
+	// system("Pause");
 	return 0;
 }
 
 void scan(){
-	readFile.open("test2.txt");
+
+	readFile.open("../test4.txt");
 
 	if (readFile.is_open())
 	{
@@ -199,12 +206,18 @@ void code(){
 		cout << "<loop_stmt> found" << endl;
 	}else if(currentToken == "abstract" || currentToken == "class"){
 		class_stmt();
+	}else if(currentToken == "function" || currentToken == "private" || currentToken == "public" || currentToken == "protected"){
+		function_stmt();
 	}else if(currentToken == "echo" || currentToken == "print"){
 		cout << "<print_stmt> found" << endl;
 	}else if(currentToken.substr(0,1) == "$"){
 	    assignment_stmt();accept(";");
 	}else if(currentToken == "define"){
 	    constant();accept(";");
+	}else if(currentToken == "interface"){
+		interface();
+	} else if(currentToken == "const"){
+		interface_const();
 	}
 }
 
@@ -539,6 +552,83 @@ void ex_impl(){
     else if(currentToken=="{"){}
 }
 
+//function ::= <access> function <var_name> (<var_list>) {<stmt-func-list>}
+void function_stmt(){
+	if (currentToken!="function")
+    {
+        access();
+    }
+    else {
+        // cout << "<function> found \t\t" << currentToken << endl;
+    }
+    currentToken = getToken();
+	if(currentToken == " "){
+		currentToken = getToken();
+		
+		if(currentToken=="function"){
+            cout << "<function> found \t\t" << currentToken << endl;
+            currentToken = getToken();
+            if(currentToken == " "){
+                currentToken = getToken();
+            }
+		}
+	}
+	var_name();
+	accept("(");
+
+	if (nextToken() != ")") {
+		var_list();
+	}
+	accept(")");
+	if (nextToken()!=";") {
+		accept("{");
+    // stmt_func_list();
+    // accept("}");
+	} else {
+		accept(";");
+	}
+}
+
+//access ::= public | protected | var | private
+void access(){
+	cout << "<access> found \t\t\t" << currentToken << endl;
+}
+
+//var_list ::= <var>,<var_list> | <var>
+void var_list(){
+	if (nextToken() == " "){
+		currentToken = getToken();
+		var_list();
+	} else if(nextToken() == ","){
+		accept(",");
+		var_list();
+	}
+	else if(currentToken != ")"){
+		currentToken = getToken();
+		var();
+		if (nextToken()==",") {
+			var_list();
+		} else if (nextToken() == ")") {
+
+		}
+		
+	}
+}
+
+void stmt_func_list(){
+	// currentToken = getToken();
+	// cout << currentToken << endl;
+	// cout << nextToken() << endl;
+	// if (currentToken!=";" and nextToken()!= "}") {
+	// 	currentToken = getToken();
+	// 	stmt_func_list();
+	// } else if(currentToken==";" and nextToken()!= "}") {
+	// 	accept(";");
+	// }else if (nextToken()=="}") {
+
+	// }
+}
+
 //interface_name_list ::= <var_name><interface_list>
 void interface_name_list(){
     var_name();
@@ -553,6 +643,30 @@ void interface_list(){
         var_name();
         interface_list();
     }
+}
+
+void interface(){
+	cout << "<interface> found \t\t" + currentToken << endl;
+	currentToken = getToken();
+	if (currentToken==" "){
+		currentToken = getToken();
+		var_name();
+	}
+	accept("{");
+	// accept("}");
+}
+
+void interface_const(){
+	cout << "<const> found \t\t\t" + currentToken << endl;
+	currentToken = getToken();
+	if(currentToken == " ") {
+		currentToken = getToken();
+		var_name();
+		accept("=");
+		currentToken = getToken();
+		value();
+		accept(";");
+	}
 }
 
 //var name
