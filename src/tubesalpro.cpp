@@ -37,6 +37,10 @@ void term();
 void term_();
 void factor();
 
+void constant();
+void const_val();
+void case_value();
+
 void boolean();
 void array_init();
 void value_list();
@@ -199,7 +203,40 @@ void code(){
 		cout << "<print_stmt> found" << endl;
 	}else if(currentToken.substr(0,1) == "$"){
 	    assignment_stmt();accept(";");
+	}else if(currentToken == "define"){
+	    constant();accept(";");
 	}
+}
+
+void constant(){
+    cout << "<constant> found \t\t" + strline << endl;
+    accept("(");
+	currentToken = getToken();
+    var_name();
+    accept(",");
+    const_val();
+    case_value();
+    accept(")");
+}
+
+void const_val(){
+    if(nextToken()=="["){
+        accept("[");
+        currentToken=getToken();
+        value_list();
+        accept("]");
+    } else{
+        currentToken=getToken();
+        value();
+    }
+}
+
+void case_value(){
+    if(nextToken()==","){
+        accept(",");
+        currentToken=getToken();
+        boolean();
+    }
 }
 
 //assignment_stmt ::= <var> = <val-assign>
@@ -347,7 +384,7 @@ void term_(){
     }
 }
 
-//<factor> ::= (<expr>) | <value_arithmetics>
+//<factor> ::= (<expr>) | <num> | <var>
 void factor(){
     if(currentToken=="("){
         cout << "accept token \t\t\t" + currentToken << endl;
@@ -361,7 +398,7 @@ void factor(){
     }
 }
 
-//<val_assign> ::= <array-init> | <object-init>
+//<val_assign> ::= <array-init> | <object-init> | <value>
 void val_assign(){
     cout << "<val_assign> found \t\t\t" + currentToken << endl;
     if (currentToken=="true" ||
