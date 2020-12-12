@@ -235,7 +235,8 @@ void case_value(){
     if(nextToken()==","){
         accept(",");
         currentToken=getToken();
-        boolean();
+        if(currentToken=="true" || currentToken=="false")
+            boolean();
     }
 }
 
