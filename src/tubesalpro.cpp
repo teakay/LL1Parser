@@ -73,6 +73,8 @@ void punctuation();
 void alphanum();
 void digit();
 bool isDigit(string str);
+void switch_case_stmt();
+void break_stmt();
 
 int main() {
 	scan();
@@ -82,7 +84,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("test3.txt");
+	readFile.open("test7.txt");
 //	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
@@ -171,7 +173,7 @@ bool isDelimiter(string ch){
 	}else if (ch == " " || ch == "+" || ch == "-" || ch == "*" ||
 		ch == "/" || ch == "," || ch == ";" || ch == "=" ||
 		ch == "(" || ch == ")" || ch == "[" || ch == "]" ||
-		ch == "{" || ch == "}" || ch == "\n" ){
+		ch == "{" || ch == "}" || ch == "\n" || ch == ":"){
 			return (true);
 	}
 	return (false);
@@ -199,11 +201,13 @@ void program(){
 void code(){
 
 	if(currentToken.substr(0,1) == "<" ||currentToken.substr(1,1) == "?"){
-		cout << "<program> found \t\t" + currentToken << endl;
+		cout << "<program> found \t\t" + strline << endl;
 	}else{
 		cout << "<code> found \t\t\t" + strline << endl;
 		if(currentToken == "if" || currentToken =="elseif" || currentToken == " else"){
 			if_else_stmt();
+		}else if(currentToken == "switch" || currentToken == "case" || currentToken == "default"){
+			switch_case_stmt();
 		}else if(currentToken == "for" || currentToken == "foreach"|| currentToken == "while" || currentToken == "do"){
 			loop_stmt();
 		}else if(currentToken == "abstract" || currentToken == "class"){
@@ -247,7 +251,9 @@ void code(){
 			call_function();
 		} else if(currentToken == "}") {
 	//			accept("}");
-		} else {
+		} else if(currentToken == "break"){
+			break_stmt();
+		}else {
 			if(strline.length() > 2){
 				currentToken = getToken();
 				code();
@@ -373,17 +379,22 @@ void cond_var(){
 		value();
 	}
 }
-
+//<cond_op> ::= < | > | <= | >= | == | === | ! | <> | != | !=== | && | || | and | or
 void cond_op(){
 	currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
 	}
-	cout << "<cond_op> found \t\t" + currentToken << endl;
+	if( currentToken == "<" || currentToken == ">" || currentToken == "<=" || currentToken == ">=" ||
+		currentToken == "==" || currentToken == "===" || currentToken == "!" || currentToken == "<>" ||
+		currentToken == "!=" || currentToken == "!===" || currentToken == "&&" || currentToken == "||" ||
+		currentToken == "and" || currentToken == "or"){
+		cout << "<cond_op> found \t\t" + currentToken << endl;
+	}
 
 }
 
-//var
+//<var> ::= $<alphanum>
 void var(){
 	cout << "<var> found \t\t\t" + currentToken << endl;
 
@@ -736,7 +747,7 @@ void interface_const(){
 	}
 }
 
-//var name
+//<var_name> ::= <alphanum>
 void var_name(){
 	cout << "<var_name> found \t\t\t" + currentToken << endl;
 	alphanum();
@@ -802,6 +813,7 @@ void accept(string str){
 	}
 }
 
+//<print_stmt> ::= echo <all_chars> | print <all_chars>
 void print_stmt(){
 	cout << "<print_stmt> found \t\t\t" + currentToken << endl;
 	all_chars();
@@ -948,5 +960,40 @@ bool isDigit(string ch){
 }
 void digit(){
 	cout << "<digit> found" ;
+}
+//<switch_case_stmt> ::= switch(<var>){ case <all_chars> || <alphanum> : <code> break; default: <code> }
+void switch_case_stmt(){
+	cout << "<switch_case_stmt> found " << currentToken << endl;
+	if(currentToken == "switch"){
+		if(nextToken() == " ")
+			currentToken = getToken();
+		accept("(");
+		currentToken = getToken();
+		var();
+		accept(")");
+		if(nextToken() == " ")
+			currentToken = getToken();
+		accept("{");
+	}
+	else if(currentToken == "case"){
+		if(nextToken() == " ")
+			currentToken = getToken();
+
+		if(nextToken().substr(0,1) == "\""){
+			all_chars();
+		}else{
+			alphanum();
+		}
+		accept(":");
+	}else if(currentToken == "default"){
+		accept(":");
+	}
+}
+//<break_stmt> ::= break;
+void break_stmt(){
+	if(currentToken == "break"){
+		cout << "<break_stmt> found" << endl;
+		accept(";");
+	}
 }
 //================= End Parser ===============================

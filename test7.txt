@@ -1,0 +1,10 @@
+<?php
+$favcolor = "red";
+switch ($favcolor) {
+case "red":
+echo "hi";
+break;
+default:
+echo "hello";
+}
+?>
