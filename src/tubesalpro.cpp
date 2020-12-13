@@ -86,7 +86,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("test6.txt");
+	readFile.open("../test2.txt");
 //	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
@@ -189,7 +189,7 @@ void parse(){
 	program();
 }
 
-//<program> ::= <?php <code> ?>
+//program --> “<?php” code “?>”
 void program(){
 	currentToken = getToken();
 	if(currentToken == "?>"){
@@ -199,7 +199,7 @@ void program(){
 	}
 }
 
-//<code> ::= <if_else_stmt> | <loop_stmt> | <class_stmt> | <print_stmt> | <assignment_stmt>
+//code --> if_else_stmt | switch_case_stmt | loop_stmt | class_stmt | access (function_stmt | var assignment_stmt”;”) | print_stmt | call_method | var_operation”;” | constant”;” | interface | interface_consts | break | continue | call_function | return
 void code(){
 
 	if(currentToken.substr(0,1) == "<" ||currentToken.substr(1,1) == "?"){
@@ -261,7 +261,7 @@ void code(){
 	}
 }
 
-//<var_operation> ::== <assignment_stmt> | <inc_dec_stmt>
+//var_operation --> var (assignment_stmt | inc_dec_stmt)
 void var_operation(){
     cout << "<var_operation> found \t\t" + strline << endl;
     if(currentToken.substr(0,1) == "$"){
@@ -276,7 +276,7 @@ void var_operation(){
     }
 }
 
-//<inc_dec_stmt>::= ++ | --
+//inc_dec_stmt --> "++" | "--"
 void inc_dec_stmt(){
     cout << "<inc-dec-stmt> found \t\t" << currentToken << endl;
     if (currentToken=="+"){
@@ -287,7 +287,7 @@ void inc_dec_stmt(){
     }
 }
 
-//<constant>::=define("<var_name>",<const_val><case_value>)
+//constant --> “define” “(“ var_name ”,”const_val case_value ”)”
 void constant(){
     cout << "<constant> found \t\t" + strline << endl;
     accept("(");
@@ -299,7 +299,7 @@ void constant(){
     accept(")");
 }
 
-//<const_val>::= <value> | [<value_list>]
+//const_val --> value | “[“value_list”]”
 void const_val(){
     if(nextToken()=="["){
         accept("[");
@@ -312,7 +312,7 @@ void const_val(){
     }
 }
 
-//<case_value>::=<boolean>|epsilon
+//case_value --> boolean | epsilon
 void case_value(){
     if(nextToken()==","){
         accept(",");
@@ -322,7 +322,7 @@ void case_value(){
     }
 }
 
-//assignment_stmt ::= = <val-assign>
+//assignment_stmt --> “=” val_assign
 void assignment_stmt(){
     cout << "<assignment> found \t\t" + currentToken << endl;
 	accept("=");
@@ -394,7 +394,7 @@ void cond_op(){
 
 }
 
-//<var> ::= $<alphanum>
+//var-->“$”alphanum array_index
 void var(){
 	cout << "<var> found \t\t\t" + currentToken << endl;
 
@@ -406,6 +406,7 @@ void var(){
 	}
 }
 
+//array_index--> “[“num”]” | epsilon
 void array_index(){
     if (nextToken()=="["){
         accept("[");
@@ -416,7 +417,7 @@ void array_index(){
     }
 }
 
-//value ::= <boolean> | <expr> | "<all_chars>" | '<all_chars>'
+//value --> boolean | expr | ”“”all_chars””” | “‘all_chars’”
 void value(){
 	cout << "<value> found \t\t\t" + currentToken << endl;
     if (currentToken=="true" || currentToken=="false"){
@@ -442,13 +443,13 @@ void value(){
     }
 }
 
-//<expr> ::= <term><expr_>
+//expr --> term expr
 void expr(){
     term();
     expr_();
 }
 
-//<expr_> ::= +<term><expr_> | -<term><expr_> | epsilon
+//expr_ --> “+”term expr_ | “-”term expr_ | epsilon
 void expr_(){
     if(nextToken()=="+"){
         accept("+");
@@ -464,13 +465,13 @@ void expr_(){
     }
 }
 
-//<term> ::= <factor><term_>
+//term --> factor term_
 void term(){
     factor();
     term_();
 }
 
-//<term_> ::= *<term><expr_> | /<term><expr_> | %<term><expr_>
+//term_ --> “*”factor term_ | “/”factor term_ | “%”factor term_ | epsilon
 void term_(){
     if(nextToken()=="*"){
         accept("*");
@@ -492,7 +493,7 @@ void term_(){
     }
 }
 
-//<factor> ::= (<expr>) | <num> | -<num> | <var>
+//factor --> “(“expr”)” | num | “-”num | var
 void factor(){
     if(currentToken=="("){
         cout << "accept token \t\t\t" + currentToken << endl;
@@ -519,7 +520,7 @@ void factor(){
     }
 }
 
-//<val_assign> ::= <array-init> | <object-init> | <value>
+//val_assign --> value | array_init | object_init
 void val_assign(){
     cout << "<val_assign> found \t\t\t" + currentToken << endl;
     if (currentToken=="true" ||
@@ -547,12 +548,12 @@ void val_assign(){
 	}
 }
 
-//boolean ::= true | false
+//boolean --> “true” | “false”
 void boolean(){
     cout << "<boolean> found \t\t\t" + currentToken << endl;
 }
 
-//array_init::= array(<value>)
+//array_init --> “array” “(“ value_list “)”
 void array_init(){
     cout << "<array_init> found \t\t\t" + currentToken << endl;
     accept("(");
@@ -561,13 +562,13 @@ void array_init(){
     accept(")");
 }
 
-//value_list::= <value><val_list>
+//value_list --> value val_list
 void value_list(){
     value();
     val_list();
 }
 
-//val_list::= ,<value><val_list> | epsilon
+//val_list --> “,”value val_list | epsilon
 void val_list(){
     if(nextToken()==","){
         accept(",");
@@ -577,7 +578,7 @@ void val_list(){
     }
 }
 
-//object_init::= new <var_name>(<value_list>)
+//object_init --> “new” var_name “(“ [value_list] “)”
 void object_init(){
     cout << "<object_init> found \t\t\t" + strline << endl;
     currentToken = getToken();
@@ -592,7 +593,7 @@ void object_init(){
     accept(")");
 }
 
-//class_stmt ::= <abstract> class <var_name> <ex-imp>{}
+//class_stmt --> abstract “class” var_name ex_imp “{“ code “}”
 void class_stmt(){
     if (currentToken=="abstract")
     {
@@ -628,7 +629,7 @@ void class_stmt(){
     //accept("}");
 }
 
-//abstract ::= abstract | epsilon
+//abstract --> “abstract” | epsilon
 void abstract(){
     if (currentToken=="abstract"){
         cout << "<abstract> found \t\t" << currentToken << endl;
@@ -636,7 +637,7 @@ void abstract(){
     else if(currentToken=="class"){}
 }
 
-//ex_impl ::= extends <var_name> | implements <interface_name_list> | epsilon
+//ex_impl --> “extends” var_name | “implements” interface_name_list | epsilon
 void ex_impl(){
     if(currentToken=="extends"){
         cout << "<ex_impl> found \t\t" << currentToken << endl;
@@ -693,7 +694,7 @@ void function_stmt(){
 	}
 }
 
-//access ::= public | protected | var | private
+//access --> public | private | protected
 void access(){
 	cout << "<access> found \t\t\t" << currentToken << endl;
 }
@@ -729,13 +730,13 @@ void var_list(){
 	}
 }
 
-//interface_name_list ::= <var_name><interface_list>
+//Interface_name_list --> var_name interface_list
 void interface_name_list(){
     var_name();
     interface_list();
 }
 
-//interface_list ::= ,<var_name><interface_list> | epsilon
+//Interface_list-->","var_name interface_list | epsilon
 void interface_list(){
     if(nextToken()==","){
         accept(",");
@@ -769,7 +770,7 @@ void interface_const(){
 	}
 }
 
-//<var_name> ::= <alphanum>
+//var_name--> alphanum
 void var_name(){
 	cout << "<var_name> found \t\t\t" + currentToken << endl;
 	alphanum();
@@ -811,6 +812,7 @@ void call_function(){
 	accept(";");
 }
 
+//call_method --> $var_name”->”var_name”(“ [var_list] ”)”
 void call_method(){
 	cout << "<call_method> found \t" + strline << endl;
 	var_name();
@@ -846,6 +848,7 @@ void print_stmt(){
 	accept(";");
 }
 
+//all_chars --> {alpha|punctuation|underscore}
 void all_chars(){
 	cout << "<all_chars> found \t\t\t" + currentToken << endl;
 
@@ -895,9 +898,13 @@ bool isPunctuation(string str){
 		}
 
 }
+
+//alpha --> “a” | “b” | “c” | … | “z” | “A” | “B”| …. | “Z”
 void alpha(){
 	cout << "<alpha> found" ;
 }
+
+//punctuation -->  “.” | “,” | “!” | “?” | “@” | “#” | “$” | “%” | “&” | “:” | “;” | “/” | “\”” | “\’”
 void punctuation(){
 	cout << "<punctuation> found" ;
 }
@@ -950,6 +957,7 @@ void loop_stmt(){
 		}
 }
 
+//alphanum-->(alpha|underscore){alpha|digit|underscore}
 void alphanum(){
 	cout << "<alphanum> found \t\t" << currentToken << endl;
 
@@ -978,7 +986,7 @@ void alphanum(){
 	}
 }
 
-//num ::= {digit}[.{digit}]
+//num --> digit{digit}[“.”digit{digit}]
 void num(){
 	cout << "<num> found \t\t" << currentToken << endl;
 
@@ -1009,9 +1017,12 @@ bool isDigit(string ch){
 		return true;
 	}
 }
+
+//digit-->“0” | ”1” | ”2” | ”3” | ”4” | ”5” | ”6” | ”7” | ”8” | ”9”
 void digit(){
 	cout << "<digit> found" ;
 }
+
 //<switch_case_stmt> ::= switch(<var>){ case <all_chars> || <alphanum> : <code> break; default: <code> }
 void switch_case_stmt(){
 	cout << "<switch_case_stmt> found " << currentToken << endl;
@@ -1040,14 +1051,14 @@ void switch_case_stmt(){
 		accept(":");
 	}
 }
-//<break_stmt> ::= break;
+//break --> “break””;”
 void break_stmt(){
 	if(currentToken == "break"){
 		cout << "<break_stmt> found" << endl;
 		accept(";");
 	}
 }
-//<continue_stmt> ::= continue;
+//continue-->“continue” “;”
 void continue_stmt(){
 	if(currentToken == "continue"){
 		cout << "<continue_stmt> found" << endl;
