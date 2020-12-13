@@ -32,6 +32,8 @@ void value();
 void val_assign();
 void num();
 
+void var_operation();
+
 void expr();
 void expr_();
 void term();
@@ -44,6 +46,7 @@ void case_value();
 
 void boolean();
 void array_init();
+void inc_dec_stmt();
 void value_list();
 void val_list();
 void object_init();
@@ -169,7 +172,7 @@ bool isDelimiter(string ch){
 	if (ch == " " || ch == "+" || ch == "-" || ch == "*" ||
 		ch == "/" || ch == "," || ch == ";" || ch == "=" ||
 		ch == "(" || ch == ")" || ch == "[" || ch == "]" ||
-		ch == "{" || ch == "}" || ch == "\n"){
+		ch == "{" || ch == "}" || ch == "\n" ){
 			return (true);
 	}
 	return (false);
@@ -214,13 +217,22 @@ void code(){
 			if (currentToken == "function") {
 				function_stmt();
 			} else if (currentToken != "function") {
+                if(currentToken.substr(0,1) == "$"){
+                    var();
+                    currentToken = getToken();
+                }
 				assignment_stmt();accept(";");
 			}
 		}
 	}else if(currentToken == "echo" || currentToken == "print"){
 		cout << "<print_stmt> found" << endl;
 	}else if(currentToken.substr(0,1) == "$"){
-	    assignment_stmt();accept(";");
+        cout << "<assignment> found \t\t" + strline << endl;
+        if(currentToken.substr(0,1) == "$"){
+            var();
+            currentToken = getToken();
+        }
+	    var_operation();accept(";");
 	}else if(currentToken == "define"){
 	    constant();accept(";");
 	}else if(currentToken == "interface"){
@@ -230,6 +242,25 @@ void code(){
 	} else if(currentToken == "return"){
 		return_stmt();
 	}
+}
+
+void var_operation(){
+    if(nextToken()=="="){
+        assignment_stmt();
+    }
+    else if(currentToken=="+"||currentToken=="-"){
+        inc_dec_stmt();
+    }
+}
+
+void inc_dec_stmt(){
+    cout << "<inc-dec-stmt> found \t\t" << currentToken << endl;
+    if (currentToken=="+"){
+        accept("+");
+    }
+    else if (currentToken=="-"){
+        accept("-");
+    }
 }
 
 void constant(){
@@ -266,11 +297,6 @@ void case_value(){
 
 //assignment_stmt ::= <var> = <val-assign>
 void assignment_stmt(){
-    cout << "<assignment> found \t\t" + strline << endl;
-	if(currentToken.substr(0,1) == "$"){
-        var();
-		currentToken = getToken();
-	}
 	accept("=");
 	currentToken = getToken();
 	if(currentToken == " "){
@@ -576,7 +602,7 @@ void function_stmt(){
     currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
-		
+
 		if(currentToken=="function"){
             cout << "<function> found \t\t" << currentToken << endl;
             currentToken = getToken();
@@ -622,7 +648,7 @@ void var_list(){
 		} else if (nextToken() == ")") {
 
 		}
-		
+
 	}
 }
 
