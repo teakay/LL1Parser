@@ -1,5 +1,9 @@
 <?php
 if($i > 0){
-echo "0";
+echo "hello";
+} elseif($i < 10){
+print "compiler";
+} else{
+$i = 10;
 }
 ?>  
