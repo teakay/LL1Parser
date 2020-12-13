@@ -219,14 +219,18 @@ void code(){
 			} else if (currentToken != "function") {
                 if(currentToken.substr(0,1) == "$"){
                     var();
-                    currentToken = getToken();
+                    if (nextToken()==" "){
+                        currentToken = getToken();
+                        assignment_stmt();
+                    }
+                    accept(";");
                 }
-				assignment_stmt();accept(";");
 			}
 		}
 	}else if(currentToken == "echo" || currentToken == "print"){
 		cout << "<print_stmt> found" << endl;
 	}else if(currentToken.substr(0,1) == "$"){
+	    // <var><var_operation>;
         cout << "<assignment> found \t\t" + strline << endl;
         if(currentToken.substr(0,1) == "$"){
             var();
@@ -244,6 +248,7 @@ void code(){
 	}
 }
 
+//<var_operation> ::== <assignment_stmt> | <inc_dec_stmt>
 void var_operation(){
     if(nextToken()=="="){
         assignment_stmt();
@@ -253,6 +258,7 @@ void var_operation(){
     }
 }
 
+//<inc_dec_stmt>::= ++ | --
 void inc_dec_stmt(){
     cout << "<inc-dec-stmt> found \t\t" << currentToken << endl;
     if (currentToken=="+"){
@@ -263,6 +269,7 @@ void inc_dec_stmt(){
     }
 }
 
+//<constant>::=define("<var_name>",<const_val><case_value>)
 void constant(){
     cout << "<constant> found \t\t" + strline << endl;
     accept("(");
@@ -274,6 +281,7 @@ void constant(){
     accept(")");
 }
 
+//<const_val>::= <value> | [<value_list>]
 void const_val(){
     if(nextToken()=="["){
         accept("[");
@@ -286,6 +294,7 @@ void const_val(){
     }
 }
 
+//<case_value>::=<boolean>|epsilon
 void case_value(){
     if(nextToken()==","){
         accept(",");
@@ -295,7 +304,7 @@ void case_value(){
     }
 }
 
-//assignment_stmt ::= <var> = <val-assign>
+//assignment_stmt ::= = <val-assign>
 void assignment_stmt(){
 	accept("=");
 	currentToken = getToken();
@@ -558,7 +567,7 @@ void class_stmt(){
 		}
 	}
     accept("{");
-    accept("}");
+    //accept("}");
 }
 
 //abstract ::= abstract | epsilon
