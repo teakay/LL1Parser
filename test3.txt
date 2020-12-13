@@ -3,4 +3,7 @@ public function func1($var1,$var2){
 private $ifs = $var1+$var2;
 return $ifs;
 }
+$a = 10;
+$b = 20;
+func1($a,$b);
 ?>
