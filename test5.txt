@@ -1,11 +1,9 @@
 <?php
-for($it = 0; $i < 0; $i++){
-echo $i;
+class animal{
+private function move(){
+return "walking";
 }
-foreach($a as $b){
-echo $b;
 }
-do{
-echo "hello";
-}while($i > 0);
-?>  
+$anim = new animal();
+$anim->move();
+?>

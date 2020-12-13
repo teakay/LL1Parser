@@ -1,0 +1,11 @@
+<?php
+for($it = 0; $i < 0; $i++){
+echo $i;
+}
+foreach($a as $b){
+echo $b;
+}
+do{
+echo "hello";
+}while($i > 0);
+?>  
