@@ -71,6 +71,8 @@ bool isPunctuation(string str);
 void alpha();
 void punctuation();
 void alphanum();
+void digit();
+bool isDigit(string str);
 
 int main() {
 	scan();
@@ -80,7 +82,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("test6.txt");
+	readFile.open("test3.txt");
 //	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
@@ -737,6 +739,7 @@ void interface_const(){
 //var name
 void var_name(){
 	cout << "<var_name> found \t\t\t" + currentToken << endl;
+	alphanum();
 }
 
 void return_stmt(){
@@ -824,8 +827,7 @@ void all_chars(){
 			punctuation();
 			cout << "\t\t" + ch << endl;
 		}else if(ch == "_"){
-			punctuation();
-			cout << "\t\t" + ch << endl;
+			cout << "underscore \t\t" + ch << endl;
 		}else{
 			cout << "Error" << endl;
 		}
@@ -835,10 +837,12 @@ void all_chars(){
 bool isAlphabet(string str){
 	if( str == "a" || str == "b" || str == "c" || str == "d" || str == "e" || str == "f" || str == "g" || str == "h" ||
 		str == "i" || str == "j" || str == "k" || str == "l" || str == "m" || str == "n" || str == "o" || str == "p" ||
-		str == "q" || str == "r" || str == "s" || str == "u" || str == "v" || str == "w" || str == "x" || str == "y" || str == "z" ||
+		str == "q" || str == "r" || str == "s" || str == "t" || str == "u" || str == "v" || str == "w" || str == "x" ||
+		str == "y" || str == "z" ||
 		str == "A" || str == "B" || str == "C" || str == "D" || str == "E" || str == "F" || str == "G" || str == "H" ||
 		str == "I" || str == "J" || str == "K" || str == "L" || str == "M" || str == "N" || str == "O" || str == "P" ||
-		str == "Q" || str == "R" || str == "S" || str == "U" || str == "V" || str == "W" || str == "X" || str == "Y" || str == "Z"
+		str == "Q" || str == "R" || str == "S" || str == "T" || str == "U" || str == "V" || str == "W" || str == "X" ||
+		str == "Y" || str == "Z"
 		)
 		return true;
 	else{
@@ -869,7 +873,6 @@ void punctuation(){
 void loop_stmt(){
 	cout << "<loop_stmt> found \t\t" << currentToken << endl;
 		if(currentToken == "for"){
-			currentToken = getToken();
 			accept("(");
 			currentToken = getToken();
 			assignment_stmt();
@@ -911,5 +914,39 @@ void loop_stmt(){
 
 void alphanum(){
 	cout << "<alphanum> found \t\t" << currentToken << endl;
+
+	int i = 0;
+	size_t tokenlen = currentToken.length();
+	while((unsigned)i < tokenlen){
+		string ch = currentToken.substr(i,1);
+		if(ch == "$"){
+			//do nothing
+			i++;
+			continue;
+		}
+		if(isAlphabet(ch)){
+			alpha();
+			cout << "\t\t" + ch << endl;
+		}
+		else if(isDigit(ch)){
+			digit();
+			cout << "\t\t" + ch << endl;
+		}else if(ch == "_"){
+			cout << "<underscore> \t\t" + ch << endl;
+		}else{
+			cout << "Error" << endl;
+		}
+		i++;
+	}
+}
+bool isDigit(string ch){
+	if(	ch == "0" || ch == "1" || ch == "2" || ch == "3" ||
+		ch == "4" || ch == "5" || ch == "6" || ch == "7"||
+		ch == "8" || ch == "9"	){
+		return true;
+	}
+}
+void digit(){
+	cout << "<digit> found" ;
 }
 //================= End Parser ===============================
