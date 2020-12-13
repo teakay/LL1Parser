@@ -83,7 +83,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("../test2.txt");
+	readFile.open("../test6.txt");
 //	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
@@ -320,10 +320,6 @@ void case_value(){
 //assignment_stmt ::= = <val-assign>
 void assignment_stmt(){
     cout << "<assignment> found \t\t" + currentToken << endl;
-	if(currentToken.substr(0,1) == "$"){
-        var();
-		currentToken = getToken();
-	}
 	accept("=");
 	currentToken = getToken();
 	if(currentToken == " "){
@@ -410,7 +406,7 @@ void array_index(){
     }
 }
 
-//value ::= <boolean> | <expr>
+//value ::= <boolean> | <expr> | "<all_chars>" | '<all_chars>'
 void value(){
 	cout << "<value> found \t\t\t" + currentToken << endl;
     if (currentToken=="true" || currentToken=="false"){
@@ -430,6 +426,9 @@ void value(){
         currentToken.substr(0,1) == "$" ||
         currentToken == "(" ){
         expr();
+    }
+    else if(currentToken.substr(0,1)=="\"" || currentToken.substr(0,1)=="\'"){
+        all_chars();
     }
 }
 
@@ -527,7 +526,7 @@ void val_assign(){
         currentToken.substr(0,1) == "8" ||
         currentToken.substr(0,1) == "9" ||
         currentToken.substr(0,1) == "$" ||
-        currentToken=="("){
+        currentToken=="("||currentToken.substr(0,1)=="\""){
         value();
 	}
 	else if(currentToken=="array"){
@@ -828,15 +827,15 @@ void accept(string str){
 
 void print_stmt(){
 	cout << "<print_stmt> found \t\t\t" + currentToken << endl;
-	all_chars();
-	accept(";");
-}
-void all_chars(){
-
-	currentToken = getToken();
+    currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
 	}
+	all_chars();
+	accept(";");
+}
+
+void all_chars(){
 	cout << "<all_chars> found \t\t\t" + currentToken << endl;
 
 	int i = 0;
@@ -892,13 +891,17 @@ void punctuation(){
 	cout << "<punctuation> found" ;
 }
 
-//<loop_stmt> ::= for(<assignment_stmt>;<condition>;<var>){<code>} || foreach(<var> as <var>){<code>}
+//<loop_stmt> ::= for(<var><assignment_stmt>;<condition>;<var>){<code>} || foreach(<var> as <var>){<code>}
 //do{<code>}while(<condition>); || while(<condition>){<code>}
 void loop_stmt(){
 	cout << "<loop_stmt> found \t\t" << currentToken << endl;
 		if(currentToken == "for"){
 			accept("(");
 			currentToken = getToken();
+            if(currentToken.substr(0,1) == "$"){
+                var();
+                currentToken = getToken();
+            }
 			assignment_stmt();
 			accept(";");
 			condition();
