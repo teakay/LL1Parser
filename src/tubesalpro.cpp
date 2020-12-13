@@ -61,6 +61,8 @@ void interface_list();
 void interface_const();
 void return_stmt();
 void var_this();
+void call_function();
+void call_method();
 void accept(string str);
 string ltrim(string str);
 
@@ -71,7 +73,7 @@ int main() {
 }
 
 void scan(){
-	readFile.open("../test3.txt");
+	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
 	{
@@ -229,8 +231,10 @@ void code(){
 		}
 	}else if(currentToken == "echo" || currentToken == "print"){
 		cout << "<print_stmt> found" << endl;
-	}else if(currentToken.substr(0,1) == "$"){
-	    // <var><var_operation>;
+	}else if (currentToken.substr(0,1) == "$" and nextToken()=="-") {
+		call_method();
+	}
+	else if(currentToken.substr(0,1) == "$"){
         cout << "<assignment> found \t\t" + strline << endl;
         if(currentToken.substr(0,1) == "$"){
             var();
@@ -245,6 +249,10 @@ void code(){
 		interface_const();
 	} else if(currentToken == "return"){
 		return_stmt();
+	} else if(nextToken() == "("){
+		call_function();
+	} else if(currentToken == "}") {
+		accept("}");
 	}
 }
 
@@ -530,7 +538,9 @@ void object_init(){
 	}
     var_name();
     accept("(");
-    value_list();
+    if(nextToken() != ")"){
+    	value_list();
+    }
     accept(")");
 }
 
@@ -640,6 +650,13 @@ void access(){
 	cout << "<access> found \t\t\t" << currentToken << endl;
 }
 
+// ignore this, ini hanya pengecekkan integer.
+bool check_number(string str) {
+   	for (int i = 0; i < str.length(); i++)
+   	if (isdigit(str[i]) == false)
+    	return false;
+      	return true;
+}
 //var_list ::= <var>,<var_list> | <var>
 void var_list(){
 	if (nextToken() == " "){
@@ -652,6 +669,9 @@ void var_list(){
 	else if(currentToken != ")"){
 		currentToken = getToken();
 		var();
+		if (check_number(currentToken)==true) {
+			num();
+		}
 		if (nextToken()==",") {
 			var_list();
 		} else if (nextToken() == ")") {
@@ -728,6 +748,33 @@ void var_this(){
 	currentToken = getToken();
 	currentToken = getToken();
 	var();
+	accept(";");
+}
+
+void call_function(){
+	cout << "<call_function> found \t" + strline << endl;
+	var_name();
+	accept("(");
+	if (nextToken() != ")") {
+		var_list();
+	}
+	accept(")");
+	accept(";");
+}
+
+void call_method(){
+	cout << "<call_method> found \t" + strline << endl;
+	var_name(); 
+	cout << "accept token \t\t\t" << "->" << endl;
+	currentToken = getToken();
+	currentToken = getToken();
+	currentToken.replace(0,1,"");
+	var_name();
+	accept("(");
+	if (nextToken() != ")") {
+		var_list();
+	}
+	accept(")");
 	accept(";");
 }
 
