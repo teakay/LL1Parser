@@ -30,6 +30,7 @@ void var_list();
 void value();
 void val_assign();
 void num();
+void array_index();
 
 void var_operation();
 
@@ -80,8 +81,8 @@ int main() {
 
 void scan(){
 
-	readFile.open("test6.txt");
-//	readFile.open("../test5.txt");
+//	readFile.open("test6.txt");
+	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
 	{
@@ -227,11 +228,6 @@ void code(){
 			call_method();
 		}
 		else if(currentToken.substr(0,1) == "$"){
-			cout << "<assignment> found \t\t" + strline << endl;
-			if(currentToken.substr(0,1) == "$"){
-				var();
-				currentToken = getToken();
-			}
 			var_operation();accept(";");
 		}else if(currentToken == "define"){
 			constant();accept(";");
@@ -241,6 +237,10 @@ void code(){
 			interface_const();
 		} else if(currentToken == "return"){
 			return_stmt();
+		} else if(currentToken == "break"){
+            cout << "<break> found \t\t" + currentToken << endl; accept(";");
+		} else if(currentToken == "continue"){
+            cout << "<continue> found \t\t" + currentToken << endl; accept(";");
 		} else if(nextToken() == "("){
 			call_function();
 		} else if(currentToken == "}") {
@@ -256,6 +256,11 @@ void code(){
 
 //<var_operation> ::== <assignment_stmt> | <inc_dec_stmt>
 void var_operation(){
+    cout << "<var_operation> found \t\t" + strline << endl;
+    if(currentToken.substr(0,1) == "$"){
+        var();
+        currentToken = getToken();
+    }
     if(nextToken()=="="){
         assignment_stmt();
     }
@@ -387,9 +392,20 @@ void var(){
 
 	if(currentToken.substr(0,1) == "$"){
 		alphanum();
+		array_index();
 //		cout << "<var> found \t\t\t" + currentToken << endl;
 //		currentToken = getToken();
 	}
+}
+
+void array_index(){
+    if (nextToken()=="["){
+        accept("[");
+        cout << "<array_index> found \t\t\t" <<endl;
+        currentToken==getToken();
+        num();
+        accept("]");
+    }
 }
 
 //value ::= <boolean> | <expr>
@@ -777,7 +793,7 @@ void call_function(){
 
 void call_method(){
 	cout << "<call_method> found \t" + strline << endl;
-	var_name(); 
+	var_name();
 	cout << "accept token \t\t\t" << "->" << endl;
 	currentToken = getToken();
 	currentToken = getToken();
