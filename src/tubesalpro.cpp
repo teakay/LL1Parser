@@ -30,6 +30,7 @@ void var_list();
 void value();
 void val_assign();
 void num();
+void array_index();
 
 void var_operation();
 
@@ -85,7 +86,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("test7.txt");
+	readFile.open("test6.txt");
 //	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
@@ -234,11 +235,6 @@ void code(){
 			call_method();
 		}
 		else if(currentToken.substr(0,1) == "$"){
-			cout << "<assignment> found \t\t" + strline << endl;
-			if(currentToken.substr(0,1) == "$"){
-				var();
-				currentToken = getToken();
-			}
 			var_operation();accept(";");
 		}else if(currentToken == "define"){
 			constant();accept(";");
@@ -248,6 +244,10 @@ void code(){
 			interface_const();
 		} else if(currentToken == "return"){
 			return_stmt();
+		} else if(currentToken == "break"){
+            cout << "<break> found \t\t" + currentToken << endl; accept(";");
+		} else if(currentToken == "continue"){
+            cout << "<continue> found \t\t" + currentToken << endl; accept(";");
 		} else if(nextToken() == "("){
 			call_function();
 		} else if(currentToken == "}") {
@@ -267,6 +267,11 @@ void code(){
 
 //<var_operation> ::== <assignment_stmt> | <inc_dec_stmt>
 void var_operation(){
+    cout << "<var_operation> found \t\t" + strline << endl;
+    if(currentToken.substr(0,1) == "$"){
+        var();
+        currentToken = getToken();
+    }
     if(nextToken()=="="){
         assignment_stmt();
     }
@@ -324,10 +329,6 @@ void case_value(){
 //assignment_stmt ::= = <val-assign>
 void assignment_stmt(){
     cout << "<assignment> found \t\t" + currentToken << endl;
-	if(currentToken.substr(0,1) == "$"){
-        var();
-		currentToken = getToken();
-	}
 	accept("=");
 	currentToken = getToken();
 	if(currentToken == " "){
@@ -403,12 +404,23 @@ void var(){
 
 	if(currentToken.substr(0,1) == "$"){
 		alphanum();
+		array_index();
 //		cout << "<var> found \t\t\t" + currentToken << endl;
 //		currentToken = getToken();
 	}
 }
 
-//value ::= <boolean> | <expr>
+void array_index(){
+    if (nextToken()=="["){
+        accept("[");
+        cout << "<array_index> found \t\t\t" <<endl;
+        currentToken==getToken();
+        num();
+        accept("]");
+    }
+}
+
+//value ::= <boolean> | <expr> | "<all_chars>" | '<all_chars>'
 void value(){
 	cout << "<value> found \t\t\t" + currentToken << endl;
     if (currentToken=="true" || currentToken=="false"){
@@ -428,6 +440,9 @@ void value(){
         currentToken.substr(0,1) == "$" ||
         currentToken == "(" ){
         expr();
+    }
+    else if(currentToken.substr(0,1)=="\"" || currentToken.substr(0,1)=="\'"){
+        all_chars();
     }
 }
 
@@ -481,7 +496,7 @@ void term_(){
     }
 }
 
-//<factor> ::= (<expr>) | <num> | <var>
+//<factor> ::= (<expr>) | <num> | -<num> | <var>
 void factor(){
     if(currentToken=="("){
         cout << "accept token \t\t\t" + currentToken << endl;
@@ -490,7 +505,20 @@ void factor(){
         accept(")");
     } else if(currentToken.substr(0,1)=="$"){
         var();
-    } else {
+    } else if(currentToken.substr(0,1) == "-") {
+        cout << "negative found \t\t\t" + currentToken << endl;
+        currentToken=getToken();
+        num();
+    } else if(currentToken.substr(0,1) == "0" ||
+        currentToken.substr(0,1) == "1" ||
+        currentToken.substr(0,1) == "2" ||
+        currentToken.substr(0,1) == "3" ||
+        currentToken.substr(0,1) == "4" ||
+        currentToken.substr(0,1) == "5" ||
+        currentToken.substr(0,1) == "6" ||
+        currentToken.substr(0,1) == "7" ||
+        currentToken.substr(0,1) == "8" ||
+        currentToken.substr(0,1) == "9"){
         num();
     }
 }
@@ -512,7 +540,7 @@ void val_assign(){
         currentToken.substr(0,1) == "8" ||
         currentToken.substr(0,1) == "9" ||
         currentToken.substr(0,1) == "$" ||
-        currentToken=="("){
+        currentToken=="("||currentToken.substr(0,1)=="\""){
         value();
 	}
 	else if(currentToken=="array"){
@@ -521,11 +549,6 @@ void val_assign(){
 	else if(currentToken=="new"){
         object_init();
 	}
-}
-
-//num
-void num(){
-    cout << "<num> found \t\t\t" + currentToken << endl;
 }
 
 //boolean ::= true | false
@@ -794,7 +817,7 @@ void call_function(){
 
 void call_method(){
 	cout << "<call_method> found \t" + strline << endl;
-	var_name(); 
+	var_name();
 	cout << "accept token \t\t\t" << "->" << endl;
 	currentToken = getToken();
 	currentToken = getToken();
@@ -819,15 +842,15 @@ void accept(string str){
 //<print_stmt> ::= echo <all_chars> | print <all_chars>
 void print_stmt(){
 	cout << "<print_stmt> found \t\t\t" + currentToken << endl;
-	all_chars();
-	accept(";");
-}
-void all_chars(){
-
-	currentToken = getToken();
+    currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
 	}
+	all_chars();
+	accept(";");
+}
+
+void all_chars(){
 	cout << "<all_chars> found \t\t\t" + currentToken << endl;
 
 	int i = 0;
@@ -883,13 +906,17 @@ void punctuation(){
 	cout << "<punctuation> found" ;
 }
 
-//<loop_stmt> ::= for(<assignment_stmt>;<condition>;<var>){<code>} || foreach(<var> as <var>){<code>}
+//<loop_stmt> ::= for(<var><assignment_stmt>;<condition>;<var>){<code>} || foreach(<var> as <var>){<code>}
 //do{<code>}while(<condition>); || while(<condition>){<code>}
 void loop_stmt(){
 	cout << "<loop_stmt> found \t\t" << currentToken << endl;
 		if(currentToken == "for"){
 			accept("(");
 			currentToken = getToken();
+            if(currentToken.substr(0,1) == "$"){
+                var();
+                currentToken = getToken();
+            }
 			assignment_stmt();
 			accept(";");
 			condition();
@@ -954,6 +981,31 @@ void alphanum(){
 		i++;
 	}
 }
+
+//num ::= {digit}[.{digit}]
+void num(){
+	cout << "<num> found \t\t" << currentToken << endl;
+
+	int i = 0;
+	bool isDecimal = false;
+	size_t tokenlen = currentToken.length();
+	while((unsigned)i < tokenlen){
+		string ch = currentToken.substr(i,1);
+		if(isDigit(ch)){
+			digit();
+			cout << "\t\t" + ch << endl;
+        }
+        else if (isDecimal==false && ch=="."){
+            isDecimal = true;
+            cout << "decimal found \t\t" << ch << endl;
+        }
+        else{
+			cout << "Error" << endl;
+		}
+		i++;
+	}
+}
+
 bool isDigit(string ch){
 	if(	ch == "0" || ch == "1" || ch == "2" || ch == "3" ||
 		ch == "4" || ch == "5" || ch == "6" || ch == "7"||
