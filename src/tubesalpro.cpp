@@ -659,7 +659,7 @@ void ex_impl(){
     else if(currentToken=="{"){}
 }
 
-//function â†’ access â€œfunctionâ€ var_name â€œ(â€œ var_list â€){â€œ code â€}â€
+//function --> access “function” var_name “(“ var_list ”){“ code ”}”
 void function_stmt(){
     currentToken = getToken();
 	if(currentToken == " "){
@@ -700,7 +700,7 @@ bool check_number(string str) {
     	return false;
       	return true;
 }
-//var_list â†’ var | var var_list
+//var_list --> var | var var_list | epsilon
 void var_list(){
 	if (nextToken() == " "){
 		currentToken = getToken();
@@ -740,7 +740,7 @@ void interface_list(){
     }
 }
 
-//interface â†’ â€œinterfaceâ€ var_name â€œ{â€œ interface_list â€œ}â€
+//interface --> “interface” var_name “{“ interface_list “}”
 void interface(){
 	cout << "<interface> found \t\t" + currentToken << endl;
 	currentToken = getToken();
@@ -751,7 +751,7 @@ void interface(){
 	accept("{");
 }
 
-//const â†’ â€œconstâ€ var_name â€œ=â€ value
+//const --> “const” var_name “=” value
 void interface_const(){
 	cout << "<const> found \t\t\t" + currentToken << endl;
 	currentToken = getToken();
@@ -771,7 +771,7 @@ void var_name(){
 	alphanum();
 }
 
-// return â†’ â€œreturnâ€ value | â€œreturnâ€ var_this
+// return --> “return” value | “return” var_this
 void return_stmt(){
 	cout << "<return> found \t\t\t" + currentToken << endl;
 	currentToken = getToken();
@@ -787,7 +787,7 @@ void return_stmt(){
 	}
 }
 
-// var_this â†’ â€œ$this->â€ var_name
+// var_this --> “$this->” var_name
 void var_this(){
 	currentToken = getToken();
 	cout << "accept token \t\t\t" << "$this->" << endl;
@@ -798,7 +798,7 @@ void var_this(){
 	accept(";");
 }
 
-// call_function â†’ var_name â€œ(â€œ var_list â€œ)â€
+// call_function --> var_name “(“ var_list “)”
 void call_function(){
 	cout << "<call_function> found \t" + strline << endl;
 	var_name();
