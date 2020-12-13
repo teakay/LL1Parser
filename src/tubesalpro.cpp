@@ -75,6 +75,7 @@ void digit();
 bool isDigit(string str);
 void switch_case_stmt();
 void break_stmt();
+void continue_stmt();
 
 int main() {
 	scan();
@@ -253,6 +254,8 @@ void code(){
 	//			accept("}");
 		} else if(currentToken == "break"){
 			break_stmt();
+		} else if(currentToken == "continue"){
+			continue_stmt();
 		}else {
 			if(strline.length() > 2){
 				currentToken = getToken();
@@ -993,6 +996,13 @@ void switch_case_stmt(){
 void break_stmt(){
 	if(currentToken == "break"){
 		cout << "<break_stmt> found" << endl;
+		accept(";");
+	}
+}
+//<continue_stmt> ::= continue;
+void continue_stmt(){
+	if(currentToken == "continue"){
+		cout << "<continue_stmt> found" << endl;
 		accept(";");
 	}
 }
