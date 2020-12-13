@@ -244,10 +244,6 @@ void code(){
 			interface_const();
 		} else if(currentToken == "return"){
 			return_stmt();
-		} else if(currentToken == "break"){
-            cout << "<break> found \t\t" + currentToken << endl; accept(";");
-		} else if(currentToken == "continue"){
-            cout << "<continue> found \t\t" + currentToken << endl; accept(";");
 		} else if(nextToken() == "("){
 			call_function();
 		} else if(currentToken == "}") {
