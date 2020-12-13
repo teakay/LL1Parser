@@ -83,7 +83,7 @@ int main() {
 
 void scan(){
 
-	readFile.open("test3.txt");
+	readFile.open("../test2.txt");
 //	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
@@ -483,7 +483,7 @@ void term_(){
     }
 }
 
-//<factor> ::= (<expr>) | <num> | <var>
+//<factor> ::= (<expr>) | <num> | -<num> | <var>
 void factor(){
     if(currentToken=="("){
         cout << "accept token \t\t\t" + currentToken << endl;
@@ -492,7 +492,20 @@ void factor(){
         accept(")");
     } else if(currentToken.substr(0,1)=="$"){
         var();
-    } else {
+    } else if(currentToken.substr(0,1) == "-") {
+        cout << "negative found \t\t\t" + currentToken << endl;
+        currentToken=getToken();
+        num();
+    } else if(currentToken.substr(0,1) == "0" ||
+        currentToken.substr(0,1) == "1" ||
+        currentToken.substr(0,1) == "2" ||
+        currentToken.substr(0,1) == "3" ||
+        currentToken.substr(0,1) == "4" ||
+        currentToken.substr(0,1) == "5" ||
+        currentToken.substr(0,1) == "6" ||
+        currentToken.substr(0,1) == "7" ||
+        currentToken.substr(0,1) == "8" ||
+        currentToken.substr(0,1) == "9"){
         num();
     }
 }
@@ -523,11 +536,6 @@ void val_assign(){
 	else if(currentToken=="new"){
         object_init();
 	}
-}
-
-//num
-void num(){
-    cout << "<num> found \t\t\t" + currentToken << endl;
 }
 
 //boolean ::= true | false
@@ -955,6 +963,31 @@ void alphanum(){
 		i++;
 	}
 }
+
+//num ::= {digit}[.{digit}]
+void num(){
+	cout << "<num> found \t\t" << currentToken << endl;
+
+	int i = 0;
+	bool isDecimal = false;
+	size_t tokenlen = currentToken.length();
+	while((unsigned)i < tokenlen){
+		string ch = currentToken.substr(i,1);
+		if(isDigit(ch)){
+			digit();
+			cout << "\t\t" + ch << endl;
+        }
+        else if (isDecimal==false && ch=="."){
+            isDecimal = true;
+            cout << "decimal found \t\t" << ch << endl;
+        }
+        else{
+			cout << "Error" << endl;
+		}
+		i++;
+	}
+}
+
 bool isDigit(string ch){
 	if(	ch == "0" || ch == "1" || ch == "2" || ch == "3" ||
 		ch == "4" || ch == "5" || ch == "6" || ch == "7"||
