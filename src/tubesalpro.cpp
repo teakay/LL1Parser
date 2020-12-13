@@ -12,7 +12,6 @@ ifstream readFile; //read
 ofstream writeFile; // write
 int startpos = 0;  //first position to get next token
 int endpos = 0; // last position to get next token
-const std::string WHITESPACE = " \n\r\t\f\v";
 
 void scan();
 void parse();
@@ -64,7 +63,14 @@ void var_this();
 void call_function();
 void call_method();
 void accept(string str);
-string ltrim(string str);
+void print_stmt();
+void all_chars();
+void loop_stmt();
+bool isAlphabet(string str);
+bool isPunctuation(string str);
+void alpha();
+void punctuation();
+void alphanum();
 
 int main() {
 	scan();
@@ -73,14 +79,13 @@ int main() {
 }
 
 void scan(){
-	readFile.open("../test5.txt");
+
+	readFile.open("test6.txt");
+//	readFile.open("../test5.txt");
 
 	if (readFile.is_open())
 	{
 		while(getline(readFile,strline)){
-			//trim whitespace - not working
-			//std::regex_replace(strline, std::regex(" \t\n+"), std::string(""));
-		    //cout << "Strline  :" <<strline << endl;
 		    parse();
 			startpos = 0;
 			endpos = 0;
@@ -92,11 +97,6 @@ void scan(){
 	}
 }
 
-std::string ltrim(const std::string& s)
-{
-    size_t start = s.find_first_not_of(" ");
-    return (start == std::string::npos) ? "" : s.substr(start);
-}
 //============== Lexical Analyzer =========================
 string getToken(){
 	int strlen = strline.length();
@@ -109,14 +109,12 @@ string getToken(){
 		}
 		if(isDelimiter(str) == true && endpos == startpos){
 			token = strline.substr(startpos, 1);
-//			cout << "token1 : " << token << endl;
 			endpos++;
 			startpos = endpos;
 			return token;
 
 		}else if (isDelimiter(str) == true && endpos != startpos || (endpos == strlen && startpos != endpos)) {
 			token = strline.substr(startpos, endpos-startpos);
-//			cout << "token2 :" << token << endl;
 			startpos = endpos;
 			return token;
 
@@ -157,21 +155,18 @@ string nextToken(){
 
 //return true if delimiter
 bool isDelimiter(string ch){
-//	if(ch == "<"  ){
-//		string nextch = strline.substr(startpos+1, 1);
-//		if(nextch == "?"){
-//			endpos++;
-//		}
-//		return true;
-//	}
-//	else if(ch == "?"){
-//		string nextch = strline.substr(startpos+1, 1);
-//		if(nextch == ">"){
-//			return true;
-//		}
-//		return true;
-//	}
-	if (ch == " " || ch == "+" || ch == "-" || ch == "*" ||
+	if(ch == "<"  ){
+		string nextch = ch.substr(1, 1);
+		if(nextch != "?"){
+			return true;
+		}
+	}
+	else if(ch == ">"){
+		string nextch = ch.substr(1, 1);
+		if(nextch != ""){
+			return true;
+		}
+	}else if (ch == " " || ch == "+" || ch == "-" || ch == "*" ||
 		ch == "/" || ch == "," || ch == ";" || ch == "=" ||
 		ch == "(" || ch == ")" || ch == "[" || ch == "]" ||
 		ch == "{" || ch == "}" || ch == "\n" ){
@@ -191,10 +186,7 @@ void parse(){
 //<program> ::= <?php <code> ?>
 void program(){
 	currentToken = getToken();
-//	cout << "token : "<< currentToken << endl;
-	if(currentToken == "<?php"){
-		cout << "<program> found \t\t" << strline << endl;
-	}else if(currentToken == "?>"){
+	if(currentToken == "?>"){
 		cout << "end <program>" << endl;
 	}else{
 		code();
@@ -203,56 +195,62 @@ void program(){
 
 //<code> ::= <if_else_stmt> | <loop_stmt> | <class_stmt> | <print_stmt> | <assignment_stmt>
 void code(){
-	cout << "<code> found \t\t\t" + strline << endl;
 
-	if(currentToken == "if"){
-		if_else_stmt();
-	}else if(currentToken == "for" || currentToken == "foreach"|| currentToken == "while" || currentToken == "do"){
-		cout << "<loop_stmt> found" << endl;
-	}else if(currentToken == "abstract" || currentToken == "class"){
-		class_stmt();
-	}else if(currentToken == "private" || currentToken == "public" || currentToken == "protected"){
-		access();
-		currentToken = getToken();
-		if (currentToken == " ") {
+	if(currentToken.substr(0,1) == "<" ||currentToken.substr(1,1) == "?"){
+		cout << "<program> found \t\t" + currentToken << endl;
+	}else{
+		cout << "<code> found \t\t\t" + strline << endl;
+		if(currentToken == "if" || currentToken =="elseif" || currentToken == " else"){
+			if_else_stmt();
+		}else if(currentToken == "for" || currentToken == "foreach"|| currentToken == "while" || currentToken == "do"){
+			loop_stmt();
+		}else if(currentToken == "abstract" || currentToken == "class"){
+			class_stmt();
+		}else if(currentToken == "private" || currentToken == "public" || currentToken == "protected"){
+			access();
 			currentToken = getToken();
 			if (currentToken == "function") {
 				function_stmt();
 			} else if (currentToken != "function") {
-                if(currentToken.substr(0,1) == "$"){
-                    var();
-                    if (nextToken()==" "){
-                        currentToken = getToken();
-                        assignment_stmt();
-                    }
-                    accept(";");
-                }
+				if(currentToken.substr(0,1) == "$"){
+					var();
+					if (nextToken()==" "){
+						currentToken = getToken();
+						assignment_stmt();
+					}
+					accept(";");
+				}
+			}
+		} else if(currentToken == "echo" || currentToken == "print"){
+			print_stmt();
+		}else if (currentToken.substr(0,1) == "$" and nextToken()=="-") {
+			call_method();
+		}
+		else if(currentToken.substr(0,1) == "$"){
+			cout << "<assignment> found \t\t" + strline << endl;
+			if(currentToken.substr(0,1) == "$"){
+				var();
+				currentToken = getToken();
+			}
+			var_operation();accept(";");
+		}else if(currentToken == "define"){
+			constant();accept(";");
+		}else if(currentToken == "interface"){
+			interface();
+		} else if(currentToken == "const"){
+			interface_const();
+		} else if(currentToken == "return"){
+			return_stmt();
+		} else if(nextToken() == "("){
+			call_function();
+		} else if(currentToken == "}") {
+	//			accept("}");
+		} else {
+			if(strline.length() > 2){
+				currentToken = getToken();
+				code();
 			}
 		}
-	}else if(currentToken == "echo" || currentToken == "print"){
-		cout << "<print_stmt> found" << endl;
-	}else if (currentToken.substr(0,1) == "$" and nextToken()=="-") {
-		call_method();
-	}
-	else if(currentToken.substr(0,1) == "$"){
-        cout << "<assignment> found \t\t" + strline << endl;
-        if(currentToken.substr(0,1) == "$"){
-            var();
-            currentToken = getToken();
-        }
-	    var_operation();accept(";");
-	}else if(currentToken == "define"){
-	    constant();accept(";");
-	}else if(currentToken == "interface"){
-		interface();
-	} else if(currentToken == "const"){
-		interface_const();
-	} else if(currentToken == "return"){
-		return_stmt();
-	} else if(nextToken() == "("){
-		call_function();
-	} else if(currentToken == "}") {
-		accept("}");
 	}
 }
 
@@ -314,6 +312,11 @@ void case_value(){
 
 //assignment_stmt ::= = <val-assign>
 void assignment_stmt(){
+    cout << "<assignment> found \t\t" + currentToken << endl;
+	if(currentToken.substr(0,1) == "$"){
+        var();
+		currentToken = getToken();
+	}
 	accept("=");
 	currentToken = getToken();
 	if(currentToken == " "){
@@ -331,15 +334,20 @@ void assignment_stmt(){
 //<if_else_stmt> ::= if(<conditions>){<block_inline_statement>} [elseif(<conditions>){<block_inline_statement>}] [else{<block_inline_statement>}]
 void if_else_stmt(){
 	cout << "<if_else_stmt> found \t\t" << currentToken << endl;
-	accept("(");
-	condition();
-	accept(")");
-	accept("{");
-
-//	currentToken = getToken();
-//	code();
-//	accept("}");
-
+	if(currentToken == "if"){
+		accept("(");
+		condition();
+		accept(")");
+		accept("{");
+	}else if(currentToken == "elseif"){
+		accept("(");
+		condition();
+		accept(")");
+		accept("{");
+		cout<<"end elseif" << endl;
+	}else if(currentToken == "else"){
+		accept("{");
+	}
 }
 
 //<condition> ::=  <cond_var><cond_op><cond_var>
@@ -359,8 +367,7 @@ void cond_var(){
 	cout << "<cond_var> found \t\t" + currentToken << endl;
 	if(currentToken.substr(0,1) == "$"){
 		var();
-	}
-	else{
+	}else{
 		value();
 	}
 }
@@ -377,6 +384,12 @@ void cond_op(){
 //var
 void var(){
 	cout << "<var> found \t\t\t" + currentToken << endl;
+
+	if(currentToken.substr(0,1) == "$"){
+		alphanum();
+//		cout << "<var> found \t\t\t" + currentToken << endl;
+//		currentToken = getToken();
+	}
 }
 
 //value ::= <boolean> | <expr>
@@ -780,12 +793,123 @@ void call_method(){
 
 void accept(string str){
 	currentToken = getToken();
-	cout << "accept token \t\t\t" + currentToken << endl;
+	cout << "accept token \t\t\t" + str + " == " + currentToken << endl;
 	if(str != currentToken){
 		cout << "error";
-		return;
-	}else{
-		return;
 	}
+}
+
+void print_stmt(){
+	cout << "<print_stmt> found \t\t\t" + currentToken << endl;
+	all_chars();
+	accept(";");
+}
+void all_chars(){
+
+	currentToken = getToken();
+	if(currentToken == " "){
+		currentToken = getToken();
+	}
+	cout << "<all_chars> found \t\t\t" + currentToken << endl;
+
+	int i = 0;
+	size_t tokenlen = currentToken.length();
+	while((unsigned)i < tokenlen){
+		string ch = currentToken.substr(i,1);
+		if(isAlphabet(ch)){
+			alpha();
+			cout << "\t\t" + ch << endl;
+		}
+		else if(isPunctuation(ch)){
+			punctuation();
+			cout << "\t\t" + ch << endl;
+		}else if(ch == "_"){
+			punctuation();
+			cout << "\t\t" + ch << endl;
+		}else{
+			cout << "Error" << endl;
+		}
+		i++;
+	}
+}
+bool isAlphabet(string str){
+	if( str == "a" || str == "b" || str == "c" || str == "d" || str == "e" || str == "f" || str == "g" || str == "h" ||
+		str == "i" || str == "j" || str == "k" || str == "l" || str == "m" || str == "n" || str == "o" || str == "p" ||
+		str == "q" || str == "r" || str == "s" || str == "u" || str == "v" || str == "w" || str == "x" || str == "y" || str == "z" ||
+		str == "A" || str == "B" || str == "C" || str == "D" || str == "E" || str == "F" || str == "G" || str == "H" ||
+		str == "I" || str == "J" || str == "K" || str == "L" || str == "M" || str == "N" || str == "O" || str == "P" ||
+		str == "Q" || str == "R" || str == "S" || str == "U" || str == "V" || str == "W" || str == "X" || str == "Y" || str == "Z"
+		)
+		return true;
+	else{
+		return false;
+	}
+
+}
+bool isPunctuation(string str){
+	if( str == "." || str == "," || str == "!" || str == "?"  || str == "@" || str == "#" ||
+		str == "$" || str == "%" || str == "&" || str == ":" || str == ";" ||  str == "/" ||
+		str == "\"" || str == "\'"){
+			return true;
+	}
+		else{
+			return false;
+		}
+
+}
+void alpha(){
+	cout << "<alpha> found" ;
+}
+void punctuation(){
+	cout << "<punctuation> found" ;
+}
+
+//<loop_stmt> ::= for(<assignment_stmt>;<condition>;<var>){<code>} || foreach(<var> as <var>){<code>}
+//do{<code>}while(<condition>); || while(<condition>){<code>}
+void loop_stmt(){
+	cout << "<loop_stmt> found \t\t" << currentToken << endl;
+		if(currentToken == "for"){
+			currentToken = getToken();
+			accept("(");
+			currentToken = getToken();
+			assignment_stmt();
+			accept(";");
+			condition();
+			accept(";");
+			currentToken = getToken();
+			if(currentToken == " ")
+				currentToken = getToken();
+			var();
+			accept("+");
+			accept("+");
+			accept(")");
+			accept("{");
+		}else if(currentToken == "foreach"){
+			accept("(");
+			currentToken = getToken();
+			var();
+			currentToken = getToken();
+			accept("as");
+			currentToken = getToken();
+			if(currentToken == " ")
+				currentToken = getToken();
+			var();
+			accept(")");
+			accept("{");
+		}else if(currentToken == "do"){
+			accept("{");
+		}else if(currentToken == "while"){
+			accept("(");
+			condition();
+			accept(")");
+			if(nextToken() == "{")
+				accept("{");
+			else if(nextToken() == ";")
+				accept(";");
+		}
+}
+
+void alphanum(){
+	cout << "<alphanum> found \t\t" << currentToken << endl;
 }
 //================= End Parser ===============================
