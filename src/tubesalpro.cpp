@@ -340,7 +340,7 @@ void assignment_stmt(){
 	}*/
 }
 
-//<if_else_stmt> ::= if(<conditions>){<block_inline_statement>} [elseif(<conditions>){<block_inline_statement>}] [else{<block_inline_statement>}]
+//if_else_stmt -->  "if(" conditions "){" code "}" ["elseif(" condition "){" code "}" ] ["else{"code"}"]
 void if_else_stmt(){
 	cout << "<if_else_stmt> found \t\t" << currentToken << endl;
 	if(currentToken == "if"){
@@ -359,7 +359,7 @@ void if_else_stmt(){
 	}
 }
 
-//<condition> ::=  <cond_var><cond_op><cond_var>
+//condition -->  cond_var cond_op cond_var
 void condition(){
 	cout << "<condition> found \t\t" + strline << endl;
 	cond_var();
@@ -367,7 +367,7 @@ void condition(){
 	cond_var();
 }
 
-//<cond_var> ::= <var> | <value>
+//cond_var --> var | value
 void cond_var(){
 	currentToken = getToken();
 	if(currentToken == " "){
@@ -380,7 +380,7 @@ void cond_var(){
 		value();
 	}
 }
-//<cond_op> ::= < | > | <= | >= | == | === | ! | <> | != | !=== | && | || | and | or
+//cond_op -->  "<" | ">" | "<=" | ">=" | "==" | "===" | "!" | "<>" | "!=" | "!===" | "&&" | "||" | "and" | "or"
 void cond_op(){
 	currentToken = getToken();
 	if(currentToken == " "){
@@ -835,7 +835,7 @@ void accept(string str){
 	}
 }
 
-//<print_stmt> ::= echo <all_chars> | print <all_chars>
+//print_stmt --> "echo" all_chars | "print" all_chars
 void print_stmt(){
 	cout << "<print_stmt> found \t\t\t" + currentToken << endl;
     currentToken = getToken();
@@ -907,8 +907,9 @@ void punctuation(){
 	cout << "<punctuation> found" ;
 }
 
-//<loop_stmt> ::= for(<var><assignment_stmt>;<condition>;<var>){<code>} || foreach(<var> as <var>){<code>}
-//do{<code>}while(<condition>); || while(<condition>){<code>}
+//loop_stmt --> "for(" var  assignment_stmt ";" condition ";" var "){" code "}" || "foreach(" var  "as" var "){" code "}"
+//|| "do{" code "}while(" condition ");" || "while(" condition "){" code "}"
+
 void loop_stmt(){
 	cout << "<loop_stmt> found \t\t" << currentToken << endl;
 		if(currentToken == "for"){
@@ -925,9 +926,7 @@ void loop_stmt(){
 			currentToken = getToken();
 			if(currentToken == " ")
 				currentToken = getToken();
-			var();
-			accept("+");
-			accept("+");
+			var_operation();
 			accept(")");
 			accept("{");
 		}else if(currentToken == "foreach"){
@@ -1021,7 +1020,7 @@ void digit(){
 	cout << "<digit> found" ;
 }
 
-//<switch_case_stmt> ::= switch(<var>){ case <all_chars> || <alphanum> : <code> break; default: <code> }
+//switch_case_stmt --> "switch(" var "){" "case" all_chars | "case" alphanum ":" code "break;" "default:" code }
 void switch_case_stmt(){
 	cout << "<switch_case_stmt> found " << currentToken << endl;
 	if(currentToken == "switch"){
