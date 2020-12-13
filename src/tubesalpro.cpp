@@ -86,8 +86,8 @@ int main() {
 
 void scan(){
 
-	readFile.open("../test2.txt");
-//	readFile.open("../test5.txt");
+	readFile.open("test6.txt");
+	// readFile.open("../test5.txt");
 
 	if (readFile.is_open())
 	{
@@ -216,6 +216,7 @@ void code(){
 			class_stmt();
 		}else if(currentToken == "private" || currentToken == "public" || currentToken == "protected"){
 			access();
+			currentToken = getToken();
 			currentToken = getToken();
 			if (currentToken == "function") {
 				function_stmt();
@@ -411,7 +412,7 @@ void array_index(){
     if (nextToken()=="["){
         accept("[");
         cout << "<array_index> found \t\t\t" <<endl;
-        currentToken==getToken();
+        currentToken=getToken();
         num();
         accept("]");
     }
@@ -658,15 +659,8 @@ void ex_impl(){
     else if(currentToken=="{"){}
 }
 
-//function ::= <access> function <var_name> (<var_list>) {<stmt-func-list>}
+//function → access “function” var_name “(“ var_list ”){“ code ”}”
 void function_stmt(){
-	// if (currentToken!="function")
- //    {
- //        access();
- //    }
- //    else {
- //        // cout << "<function> found \t\t" << currentToken << endl;
- //    }
     currentToken = getToken();
 	if(currentToken == " "){
 		currentToken = getToken();
@@ -688,13 +682,13 @@ void function_stmt(){
 	accept(")");
 	if (nextToken()!=";") {
 		accept("{");
-    // accept("}");
 	} else {
 		accept(";");
 	}
 }
 
-//access --> public | private | protected
+
+//access --> "public" | "private" | "protected"
 void access(){
 	cout << "<access> found \t\t\t" << currentToken << endl;
 }
@@ -706,7 +700,7 @@ bool check_number(string str) {
     	return false;
       	return true;
 }
-//var_list ::= <var>,<var_list> | <var>
+//var_list → var | var var_list
 void var_list(){
 	if (nextToken() == " "){
 		currentToken = getToken();
@@ -746,6 +740,7 @@ void interface_list(){
     }
 }
 
+//interface → “interface” var_name “{“ interface_list “}”
 void interface(){
 	cout << "<interface> found \t\t" + currentToken << endl;
 	currentToken = getToken();
@@ -754,9 +749,9 @@ void interface(){
 		var_name();
 	}
 	accept("{");
-	// accept("}");
 }
 
+//const → “const” var_name “=” value
 void interface_const(){
 	cout << "<const> found \t\t\t" + currentToken << endl;
 	currentToken = getToken();
@@ -776,6 +771,7 @@ void var_name(){
 	alphanum();
 }
 
+// return → “return” value | “return” var_this
 void return_stmt(){
 	cout << "<return> found \t\t\t" + currentToken << endl;
 	currentToken = getToken();
@@ -791,6 +787,7 @@ void return_stmt(){
 	}
 }
 
+// var_this → “$this->” var_name
 void var_this(){
 	currentToken = getToken();
 	cout << "accept token \t\t\t" << "$this->" << endl;
@@ -801,6 +798,7 @@ void var_this(){
 	accept(";");
 }
 
+// call_function → var_name “(“ var_list “)”
 void call_function(){
 	cout << "<call_function> found \t" + strline << endl;
 	var_name();
