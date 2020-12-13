@@ -1,0 +1,9 @@
+<?php
+class animal{
+private function move(){
+return "walking";
+}
+}
+$anim = new animal();
+$anim->move();
+?>
